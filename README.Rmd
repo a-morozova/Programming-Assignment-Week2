@@ -1,0 +1,172 @@
+---
+title: "Programming Assignment 1"
+author: "Anastasiia Morozova"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Programming Assignment 1 -- R Programming by Johns Hopkins University
+
+For this first programming assignment I wrote three functions that are meant to interact with dataset that accompanies this assignment. The dataset is contained in a zip file [specdata.zip](https://d396qusza40orc.cloudfront.net/rprog%2Fdata%2Fspecdata.zip)
+
+The zip file contains 332 comma-separated-value (CSV) files containing pollution monitoring data for fine particulate matter (PM) air pollution at 332 locations in the United States. Each file contains data from a single monitor and the ID number for each monitor is contained in the file name. For example, data for monitor 200 is contained in the file "200.csv". Each file contains three variables:
+
+-   **Date**: the date of the observation in YYYY-MM-DD format (year-month-day)
+-   **sulfate**: the level of sulfate PM in the air on that date (measured in micrograms per cubic meter)
+-   **nitrate**: the level of nitrate PM in the air on that date (measured in micrograms per cubic meter) In each file you'll notice that there are many days where either sulfate or nitrate (or both) are missing (coded as NA). This is common with air pollution monitoring data in the United States.
+
+We can preview what the binded file (of 332 csv files) would look like with a tidyverse solution, although it is not necessary
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+specdata <- setwd("~/Desktop/Rversioncontrol/R-Programming-Course/specdata")
+library(tidyverse)
+specdata_df <-
+  list.files(pattern = "*.csv") %>% 
+  map_df(~read_csv(.))
+```
+
+```{r eval=TRUE}
+head(specdata_df)
+```
+
+```{r echo=FALSE}
+setwd("~/Desktop/Rversioncontrol/R-Programming-Course")
+```
+
+Don't forget to reverse the working directory back to the main one containing the specdata zip file before implementing the next set of functions.
+
+### Part 1
+
+For Part 1, the task is to write a function named 'pollutantmean' that calculates the mean of a pollutant (sulfate or nitrate) across a specified list of monitors. The function 'pollutantmean' takes three arguments: 'directory', 'pollutant', and 'id'. Given a vector monitor ID numbers, 'pollutantmean' reads that monitors' particulate matter data from the directory specified in the 'directory' argument and returns the mean of the pollutant across all of the monitors, ignoring any missing values coded as NA. A prototype of the function is as follows:
+
+![Prototype for "pollutantmean" function](AniR5o00EeWk4wrqfRkIMQ_26d94fc4f878a8b60240f6fda6e17f6c_Screen-Shot-2015-11-17-at-9.03.29-AM.png "Prototype for "pollutantmean" function")
+
+The resulting function is:
+
+```{r}
+pollutantmean <- function(directory, pollutant, id=1:332) {
+  filePaths <- list.files((paste(getwd(), "/", directory, "/", sep = "")), "\\.csv$", full.names = TRUE)
+  result <- do.call(rbind, lapply(filePaths, read.csv))
+  sub_id <- NULL
+  for (i in id) {sub_id <- rbind(result[result$ID == i,], sub_id)}
+  mean(sub_id[[pollutant]], na.rm=TRUE)
+}
+```
+
+Sample output is below:
+
+```{r eval=TRUE}
+pollutantmean("specdata", "sulfate", 1:10)
+```
+
+```{r eval=TRUE}
+pollutantmean("specdata", "nitrate", 70:72)
+```
+
+```{r eval=TRUE}
+pollutantmean("specdata", "nitrate", 23)
+```
+
+### Part 2
+
+For part 2 the task is to write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows:
+
+![Prototype for "complete" function](Jnt5oY00EeWisRLkE7o57Q_2713e281672695ec59b29f83ec95f7b1_Screen-Shot-2015-11-17-at-9.04.23-AM.png "Prototype for "complete" function")
+
+The resulting code as follows:
+
+```{r}
+complete <- function(directory, id=1:332) {
+ compl <- data.frame("id" = numeric(),    
+                     'nobs' =  numeric())
+             for (i in id) {
+                     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
+                     monitor_data <- read.csv(path)
+                     j<- which(id==i)
+                      list_j <- c(i, sum(complete.cases(monitor_data)))
+                       compl[j,] <- list_j
+    }
+  compl
+}
+```
+
+And the sample output is below:
+
+```{r eval=TRUE, paged.print=FALSE}
+complete("specdata", 1)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+complete("specdata", c(2, 4, 8, 10, 12))
+```
+
+```{r paged.print=FALSE}
+complete("specdata", 30:25)
+```
+
+```{r paged.print=FALSE}
+complete("specdata", 3)
+```
+
+### Part 3   
+
+For the last part, the task is to write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0. A prototype of this function follows:
+
+![Prototype for "corr" function](OXaiR400EeWk4wrqfRkIMQ_dafbb49ef127335cf1f9468fcadbd4ee_Screen-Shot-2015-11-17-at-9.05.01-AM.png "Prototype for "corr" function")
+
+The resulting function is as follows:
+
+```{r}
+corr <- function(directory, threshold=0) {
+  store <-numeric()
+  for (i in 1:332) {
+    path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
+    monitor_data <- read.csv(path)
+    if ((sum(complete.cases(monitor_data)))>threshold) 
+    {store[(length(store) + 1)] <- (cor(monitor_data$nitrate, monitor_data$sulfate, use = "na.or.complete"))}
+  } 
+  store
+  }
+```
+
+And the sample output is below:
+
+```{r eval=TRUE, paged.print=FALSE}
+cr <- corr("specdata", 150)
+head(cr)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+summary(cr)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+cr <- corr("specdata", 400)
+head(cr)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+summary(cr)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+cr <- corr("specdata", 5000)
+summary(cr)
+```
+
+```{r}
+length(cr)
+```
+
+```{r eval=TRUE, paged.print=FALSE}
+cr <- corr("specdata")
+summary(cr)
+```
+
+```{r}
+length(cr)
+```
