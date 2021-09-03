@@ -2,7 +2,9 @@
 title: "Programming Assignment 1"
 author: "Anastasiia Morozova"
 date: "8/13/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +24,7 @@ The zip file contains 332 comma-separated-value (CSV) files containing pollution
 We can preview what the binded file (of 332 csv files) would look like with a tidyverse solution, although it is not necessary
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-specdata <- setwd("~/Desktop/Rversioncontrol/R-Programming-Course/specdata")
+setwd("/Users/anastasiiamorozova/Desktop/Rversioncontrol/R-Programming-Course/specdata")
 library(tidyverse)
 specdata_df <-
   list.files(pattern = "*.csv") %>% 
