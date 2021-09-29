@@ -61,7 +61,8 @@ The resulting function is:
 
 ``` r
 pollutantmean <- function(directory, pollutant, id=1:332) {
-  filePaths <- list.files((paste(getwd(), "/", directory, "/", sep = "")), "\\.csv$", full.names = TRUE)
+  filePaths <- list.files((paste(getwd(), "/", directory, "/", sep = "")), "\\.csv$", 
+                          full.names = TRUE)
   result <- do.call(rbind, lapply(filePaths, read.csv))
   sub_id <- NULL
   for (i in id) {sub_id <- rbind(result[result$ID == i,], sub_id)}
@@ -107,7 +108,8 @@ complete <- function(directory, id=1:332) {
  compl <- data.frame("id" = numeric(),    
                      'nobs' =  numeric())
              for (i in id) {
-                     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
+                     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), 
+                                   ".csv", sep = "")
                      monitor_data <- read.csv(path)
                      j<- which(id==i)
                       list_j <- c(i, sum(complete.cases(monitor_data)))
@@ -180,7 +182,8 @@ corr <- function(directory, threshold=0) {
     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
     monitor_data <- read.csv(path)
     if ((sum(complete.cases(monitor_data)))>threshold) 
-    {store[(length(store) + 1)] <- (cor(monitor_data$nitrate, monitor_data$sulfate, use = "na.or.complete"))}
+    {store[(length(store) + 1)] <- (cor(monitor_data$nitrate, monitor_data$sulfate, 
+                                        use = "na.or.complete"))}
   } 
   store
   }
