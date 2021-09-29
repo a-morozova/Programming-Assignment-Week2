@@ -22,6 +22,17 @@ file name. For example, data for monitor 200 is contained in the file
     are missing (coded as NA). This is common with air pollution
     monitoring data in the United States.
 
+Let us download the file and position it properly:
+
+``` r
+fileUrl <- "https://d396qusza40orc.cloudfront.net/rprog%2Fdata%2Fspecdata.zip"
+download.file(fileUrl, 
+              destfile = "~/Desktop/Rversioncontrol/R-Programming-Course/specdata.zip", 
+              method="curl")
+dateDownloaded <- date()
+unzip("~/Desktop/Rversioncontrol/R-Programming-Course/specdata.zip")
+```
+
 We can preview what the binded file (of 332 csv files) would look like
 with a tidyverse solution, although it is not necessary
 
