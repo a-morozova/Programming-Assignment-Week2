@@ -23,11 +23,15 @@ The zip file contains 332 comma-separated-value (CSV) files containing pollution
 
 We can preview what the binded file (of 332 csv files) would look like with a tidyverse solution, although it is not necessary
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-setwd("/Users/anastasiiamorozova/Desktop/Rversioncontrol/R-Programming-Course/specdata")
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+fileUrl <- "https://d396qusza40orc.cloudfront.net/rprog%2Fdata%2Fspecdata.zip"
+download.file(fileUrl, destfile = "~/Desktop/Rversioncontrol/R-Programming-Course/specdata.zip", method="curl")
+dateDownloaded <- date()
+unzip("~/Desktop/Rversioncontrol/R-Programming-Course/specdata.zip")
+setwd("~/Desktop/Rversioncontrol/R-Programming-Course/specdata")
 library(tidyverse)
 specdata_df <-
-  list.files(pattern = "*.csv") %>% 
+  list.files(path="~/Desktop/Rversioncontrol/R-Programming-Course/specdata", pattern = "*.csv") %>% 
   map_df(~read_csv(.))
 ```
 
@@ -51,7 +55,8 @@ The resulting function is:
 
 ```{r}
 pollutantmean <- function(directory, pollutant, id=1:332) {
-  filePaths <- list.files((paste(getwd(), "/", directory, "/", sep = "")), "\\.csv$", full.names = TRUE)
+  filePaths <- list.files((paste(getwd(), "/", directory, "/", sep = "")), "\\.csv$", 
+                          full.names = TRUE)
   result <- do.call(rbind, lapply(filePaths, read.csv))
   sub_id <- NULL
   for (i in id) {sub_id <- rbind(result[result$ID == i,], sub_id)}
@@ -86,7 +91,8 @@ complete <- function(directory, id=1:332) {
  compl <- data.frame("id" = numeric(),    
                      'nobs' =  numeric())
              for (i in id) {
-                     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
+                     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), 
+                                   ".csv", sep = "")
                      monitor_data <- read.csv(path)
                      j<- which(id==i)
                       list_j <- c(i, sum(complete.cases(monitor_data)))
@@ -129,7 +135,8 @@ corr <- function(directory, threshold=0) {
     path <- paste(getwd(), "/", directory, "/", sprintf("%03d", i), ".csv", sep = "")
     monitor_data <- read.csv(path)
     if ((sum(complete.cases(monitor_data)))>threshold) 
-    {store[(length(store) + 1)] <- (cor(monitor_data$nitrate, monitor_data$sulfate, use = "na.or.complete"))}
+    {store[(length(store) + 1)] <- (cor(monitor_data$nitrate, monitor_data$sulfate, 
+                                        use = "na.or.complete"))}
   } 
   store
   }
